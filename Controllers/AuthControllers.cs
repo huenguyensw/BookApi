@@ -23,7 +23,7 @@ namespace BookApi.Controllers
             {
                 return Unauthorized();
             }
-            return Ok(token);
+            return Ok(new {token});
         }
 
         [HttpPost("register")]
