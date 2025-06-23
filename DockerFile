@@ -1,15 +1,32 @@
-# Use the official .NET SDK image to build the app
+# Use the official .NET SDK image
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+
 WORKDIR /app
 
-# Copy everything and build
+# Copy project files
 COPY . ./
+
+# Restore dependencies
+RUN dotnet restore
+
+# Build the project
+RUN dotnet build --configuration Release
+
+# Publish the app
 RUN dotnet publish -c Release -o out
 
-# Build runtime image
+# Use ASP.NET runtime image for the app
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
+
 WORKDIR /app
+
 COPY --from=build /app/out .
 
-# Start the app
+# Expose port Render expects
+EXPOSE 10000
+
+# Set the environment URL (again, matches Program.cs)
+ENV ASPNETCORE_URLS=http://0.0.0.0:10000
+
+# Run the application
 ENTRYPOINT ["dotnet", "BookApi.dll"]
