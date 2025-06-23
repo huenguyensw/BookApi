@@ -4,7 +4,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://0.0.0.0:10000");
+// builder.WebHost.UseUrls("http://0.0.0.0:10000");
+
+// Bind to PORT env variable (for Render)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(Int32.Parse(port));
+});
 
 DotNetEnv.Env.Load();
 
@@ -130,9 +138,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+     app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowAllOrigins");
 app.MapControllers();
 app.UseAuthentication();
