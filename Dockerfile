@@ -16,7 +16,7 @@ RUN dotnet build --configuration Release
 RUN dotnet publish -c Release -o out
 
 # Use ASP.NET runtime image for the app
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-preview
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
 WORKDIR /app
 
