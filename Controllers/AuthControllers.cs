@@ -23,7 +23,30 @@ namespace BookApi.Controllers
             {
                 return Unauthorized();
             }
-            return Ok(new {token});
+            
+            Response.Cookies.Append("token", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddHours(1)
+            });
+
+            return Ok(new { message = "Login successful" });
+        }
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("token");
+            return Ok(new { message = "Logout successful" });
+        }
+
+        [HttpGet("status")]
+        public IActionResult Status()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return Ok(new { authenticated = true });
+            return Ok(new { authenticated = false });
         }
 
         [HttpPost("register")]

@@ -16,40 +16,65 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 
 DotNetEnv.Env.Load();
 
-builder.Configuration.AddEnvironmentVariables() ;
+builder.Configuration.AddEnvironmentVariables(prefix: "MYAPP_") ;
+
+
+//Load custom configuration settings
+
+string GetEnvOrConfig(string envVar, string configValue) =>
+    Environment.GetEnvironmentVariable(envVar) ?? configValue;
+
+// Bind and configure BookStoreDatabaseSettings
+var bookStoreSettings = new BookStoreDatabaseSettings();
+builder.Configuration.GetSection("BookStoreDatabaseSettings").Bind(bookStoreSettings);
+bookStoreSettings.ConnectionString = GetEnvOrConfig("MYAPP_MONGODB_CONNECTION", bookStoreSettings.ConnectionString);
 
 builder.Services.Configure<BookStoreDatabaseSettings>(options =>
 {
-    options.ConnectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTION") 
-                                ?? builder.Configuration["BookStoreDatabaseSettings:ConnectionString"];
-    options.DatabaseName = builder.Configuration["BookStoreDatabaseSettings:DatabaseName"] ?? "BookStoreDb";
-    options.BooksCollectionName = builder.Configuration["BookStoreDatabaseSettings:BooksCollectionName"] ?? "Books";
+    options.ConnectionString = bookStoreSettings.ConnectionString;
+    options.DatabaseName = bookStoreSettings.DatabaseName;
+    options.BooksCollectionName = bookStoreSettings.BooksCollectionName;
 });
+
+
+// Bind and configure UserManagementSettings
+var userManagementSettings = new UserManagementSettings();
+builder.Configuration.GetSection("UserManagementSettings").Bind(userManagementSettings);
+userManagementSettings.ConnectionString = GetEnvOrConfig("MYAPP_USERMANAGEMENT_MONGODB_CONNECTION", userManagementSettings.ConnectionString);
 
 builder.Services.Configure<UserManagementSettings>(options =>
 {
-    options.ConnectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTION") 
-                                ?? builder.Configuration["UserManagementSettings:ConnectionString"];
-    options.DatabaseName = builder.Configuration["UserManagementSettings:DatabaseName"] ?? "UserManagementDb";
-    options.UsersCollectionName = builder.Configuration["UserManagementSettings:UsersCollectionName"] ?? "Users";
+    options.ConnectionString = userManagementSettings.ConnectionString;
+    options.DatabaseName = userManagementSettings.DatabaseName;
+    options.UsersCollectionName = userManagementSettings.UsersCollectionName;
 });
+
+
+var jwtSettings = new JwtSettings();
+builder.Configuration.GetSection("JwtSettings").Bind(jwtSettings);
+jwtSettings.SecretKey = Environment.GetEnvironmentVariable("MYAPP_JWT_SECRET_KEY") 
+                        ?? jwtSettings.SecretKey;
+
+if (string.IsNullOrEmpty(jwtSettings.SecretKey))
+{
+    throw new InvalidOperationException("JWT secret key is not configured.");
+}
+
+// Correct key for expiry minutes (matches your appsettings.json)
+jwtSettings.ExpirationMinutes = int.TryParse(builder.Configuration["JwtSettings:ExpiryMinutes"], out var minutes)
+                                ? minutes
+                                : 30;
 
 builder.Services.Configure<JwtSettings>(options =>
 {
-    var configuration = builder.Configuration;
-
-    options.Issuer = configuration["JwtSettings:Issuer"] ?? "BookApiIssuer";
-    options.Audience = configuration["JwtSettings:Audience"] ?? "BookApiAudience";
-    options.SecretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
-                          ?? configuration["JwtSettings:SecretKey"]
-                          ?? throw new InvalidOperationException("JWT secret key is not configured.");
-    options.ExpirationMinutes = int.TryParse(configuration["JwtSettings:ExpirationMinutes"], out var minutes)
-                                ? minutes
-                                : 30;
+    options.Issuer = jwtSettings.Issuer ?? "BookApiIssuer";
+    options.Audience = jwtSettings.Audience ?? "BookApiAudience";
+    options.SecretKey = jwtSettings.SecretKey;
+    options.ExpirationMinutes = jwtSettings.ExpirationMinutes;
 });
 
 
-// Lägg till autentisering
+// JWT Authentication via Cookie
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
     ?? throw new InvalidOperationException("JwtSettings section is missing in configuration.");
 
@@ -75,7 +100,22 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings.Audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
     };
+    // Extract token from cookie
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Cookies["token"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
+
+
 builder.Services.AddAuthorization();
 
 
@@ -123,12 +163,19 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 
 
+var allowedOrigins = (Environment.GetEnvironmentVariable("FRONTEND_URLS") ?? "")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder => builder.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader());
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200","https://bookapi-8cvo.onrender.com")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); 
+    });
 });
 
 var app = builder.Build();
@@ -142,7 +189,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowFrontend");
 app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();
