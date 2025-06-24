@@ -168,7 +168,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200","https://bookapi-8cvo.onrender.com")
+        policy.WithOrigins("http://localhost:4200","https://book-app-delta-hazel.vercel.app")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); 
