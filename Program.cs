@@ -74,9 +74,6 @@ builder.Services.Configure<JwtSettings>(options =>
 });
 
 
-// JWT Authentication via Cookie
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
-    ?? throw new InvalidOperationException("JwtSettings section is missing in configuration.");
 
 var key = jwtSettings.SecretKey 
     ?? throw new InvalidOperationException("JWT SecretKey is missing.");
