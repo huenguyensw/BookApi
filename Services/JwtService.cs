@@ -14,7 +14,7 @@ namespace BookApi.Services
         public JwtService(IConfiguration configuration)
         {
             _configuration = configuration;
-            var secretKey = _configuration["JwtSettings:SecretKey"];
+            var secretKey = Environment.GetEnvironmentVariable("MYAPP_JWT_SECRET_KEY");
             if (string.IsNullOrEmpty(secretKey))
             {
                 throw new Exception("JWT secret key is not configured.");
@@ -30,7 +30,7 @@ namespace BookApi.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("MYAPP_JWT_SECRET_KEY")));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

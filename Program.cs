@@ -52,14 +52,14 @@ builder.Services.Configure<UserManagementSettings>(options =>
 
 var jwtSettings = new JwtSettings();
 builder.Configuration.GetSection("JwtSettings").Bind(jwtSettings);
-jwtSettings.SecretKey = Environment.GetEnvironmentVariable("MYAPP_JWT_SECRET_KEY") 
-                        ?? jwtSettings.SecretKey;
+jwtSettings.SecretKey = Environment.GetEnvironmentVariable("MYAPP_JWT_SECRET_KEY");
 
 if (string.IsNullOrEmpty(jwtSettings.SecretKey))
 {
     throw new InvalidOperationException("JWT secret key is not configured.");
 }
-
+// Optional: Log the key for debugging (⚠️ Never do this in production!)
+Console.WriteLine($"[Startup] JWT Secret Key (first 5 chars): {jwtSettings.SecretKey.Substring(0, 5)}...");
 // Correct key for expiry minutes (matches your appsettings.json)
 jwtSettings.ExpirationMinutes = int.TryParse(builder.Configuration["JwtSettings:ExpiryMinutes"], out var minutes)
                                 ? minutes
@@ -85,6 +85,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+     var secretKey = builder.Configuration["Jwt:Key"];
+        Console.WriteLine($"[JWT Validation] Using signing key: {secretKey}");
     options.RequireHttpsMetadata = true;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
@@ -102,12 +104,22 @@ builder.Services.AddAuthentication(options =>
     {
         OnMessageReceived = context =>
         {
-            var token = context.Request.Cookies["token"];
-            if (!string.IsNullOrEmpty(token))
-            {
-                context.Token = token;
-            }
-            return Task.CompletedTask;
+            // 1. From cookie
+        var token = context.Request.Cookies["token"];
+        
+        // 2. Fallback to Authorization header
+        if (string.IsNullOrEmpty(token))
+        {
+            token = context.Request.Headers["Authorization"]
+                .FirstOrDefault()?.Replace("Bearer ", "");
+        }
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            context.Token = token;
+        }
+
+        return Task.CompletedTask;
         }
     };
 });

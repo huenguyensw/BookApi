@@ -31,6 +31,18 @@ namespace BookApi.Controllers
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
             });
+            var isDev = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+            var includeToken = isDev || Request.Query["debug"] == "true";
+
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            Console.WriteLine($"ASPNETCORE_ENVIRONMENT: {env}");
+
+            if (includeToken)
+            {
+                        return Ok(new { message = "Login successful", token });
+            }
+
+return Ok(new { message = "Login successful" });
 
             return Ok(new { message = "Login successful" });
         }
