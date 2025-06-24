@@ -40,7 +40,7 @@ builder.Services.Configure<BookStoreDatabaseSettings>(options =>
 // Bind and configure UserManagementSettings
 var userManagementSettings = new UserManagementSettings();
 builder.Configuration.GetSection("UserManagementSettings").Bind(userManagementSettings);
-userManagementSettings.ConnectionString = GetEnvOrConfig("USERMANAGEMENT_MONGODB_CONNECTION", userManagementSettings.ConnectionString);
+userManagementSettings.ConnectionString = GetEnvOrConfig("MYAPP_MONGODB_CONNECTION", userManagementSettings.ConnectionString);
 
 builder.Services.Configure<UserManagementSettings>(options =>
 {
@@ -168,7 +168,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200","https://book-app-delta-hazel.vercel.app")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); 
