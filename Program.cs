@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.WebHost.UseUrls("http://0.0.0.0:10000");
 
 // Bind to PORT env variable (for Render)
-var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+var port = Environment.GetEnvironmentVariable("MYAPP_PORT") ?? "10000";
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
@@ -40,7 +40,7 @@ builder.Services.Configure<BookStoreDatabaseSettings>(options =>
 // Bind and configure UserManagementSettings
 var userManagementSettings = new UserManagementSettings();
 builder.Configuration.GetSection("UserManagementSettings").Bind(userManagementSettings);
-userManagementSettings.ConnectionString = GetEnvOrConfig("MYAPP_USERMANAGEMENT_MONGODB_CONNECTION", userManagementSettings.ConnectionString);
+userManagementSettings.ConnectionString = GetEnvOrConfig("USERMANAGEMENT_MONGODB_CONNECTION", userManagementSettings.ConnectionString);
 
 builder.Services.Configure<UserManagementSettings>(options =>
 {
@@ -160,7 +160,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 
 
-var allowedOrigins = (Environment.GetEnvironmentVariable("FRONTEND_URLS") ?? "")
+var allowedOrigins = (Environment.GetEnvironmentVariable("MYAPP_FRONTEND_URLS") ?? "")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 
