@@ -31,8 +31,8 @@ Frontend-repo: [https://github.com/huenguyensw/BookApi](https://github.com/hueng
 ### 1. Klona repot
 
 ```bash
-git clone https://github.com/huenguyensw/book-api.git
-cd book-api
+git clone https://github.com/huenguyensw/BookApi.git
+cd BookApi
 ```
 
 ### 2. Konfigurera miljövariabler
