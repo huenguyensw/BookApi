@@ -42,10 +42,9 @@ namespace BookApi.Controllers
                         return Ok(new { message = "Login successful", token });
             }
 
-return Ok(new { message = "Login successful" });
-
             return Ok(new { message = "Login successful" });
         }
+        
         [HttpPost("logout")]
         public IActionResult Logout()
         {

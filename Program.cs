@@ -178,7 +178,7 @@ var allowedOrigins = (Environment.GetEnvironmentVariable("MYAPP_FRONTEND_URLS") 
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowAngularOrigins", policy =>
     {
         policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
@@ -198,7 +198,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+app.UseCors("AllowAngularOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
