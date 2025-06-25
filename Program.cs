@@ -180,7 +180,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularOrigins", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
+        policy.WithOrigins("https://book-app-delta-hazel.vercel.app", "https://book-app-delta.vercel.app", "http://localhost:4200")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); 
