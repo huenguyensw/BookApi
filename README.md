@@ -12,7 +12,6 @@ Frontend-repo: [https://github.com/huenguyensw/BookApi](https://github.com/hueng
 - ✅ CRUD för böcker (Skapa, Läs, Uppdatera, Radera)
 - 🔐 JWT-baserad autentisering (lagras i cookies)
 - 📦 MongoDB som databas
-- 🔁 CORS-konfiguration för frontend-hostar
 - 🧪 Swagger UI för test av endpoints
 - 📂 Strukturerad med Services, Models och Kontrollers
 
@@ -23,7 +22,6 @@ Frontend-repo: [https://github.com/huenguyensw/BookApi](https://github.com/hueng
 - .NET 8 Web API  
 - MongoDB (Atlas)
 - JWT (via `System.IdentityModel.Tokens.Jwt`)
-- CORS Middleware
 - Swagger (för test & dokumentation)
 
 ---
