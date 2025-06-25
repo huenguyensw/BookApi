@@ -175,10 +175,10 @@ builder.Services.AddControllers();
 var allowedOrigins = (Environment.GetEnvironmentVariable("MYAPP_FRONTEND_URLS") ?? "")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularOrigins", policy =>
+    options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
         policy.WithOrigins("https://book-app-delta-hazel.vercel.app", "https://book-app-delta.vercel.app", "http://localhost:4200")
               .AllowAnyMethod()
@@ -198,7 +198,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
-app.UseCors("AllowAngularOrigins");
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 
