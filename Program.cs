@@ -175,15 +175,14 @@ builder.Services.AddControllers();
 var allowedOrigins = (Environment.GetEnvironmentVariable("MYAPP_FRONTEND_URLS") ?? "")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://book-app-delta-hazel.vercel.app", "https://book-app-delta.vercel.app", "http://localhost:4200")
-              .AllowAnyMethod()
+        policy.WithOrigins("https://book-app-delta-hazel.vercel.app")
+              .AllowCredentials()
               .AllowAnyHeader()
-              .AllowCredentials(); 
+              .AllowAnyMethod();
     });
 });
 
@@ -198,7 +197,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
