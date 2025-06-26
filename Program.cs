@@ -175,6 +175,8 @@ builder.Services.AddControllers();
 var allowedOrigins = (Environment.GetEnvironmentVariable("MYAPP_FRONTEND_URLS") ?? "")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+Console.WriteLine($"[Startup] Allowed CORS origins: {string.Join(", ", allowedOrigins)}");
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -201,7 +203,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-
 
 app.Run();

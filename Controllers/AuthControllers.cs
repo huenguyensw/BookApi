@@ -49,11 +49,9 @@ namespace BookApi.Controllers
         [HttpOptions("login")]
         public IActionResult PreflightLogin()
         {
-            Response.Headers.Add("Access-Control-Allow-Origin", "https://book-app-delta-hazel.vercel.app");
-            Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-            Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
-            Response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");
-            return NoContent();
+            var allowedOrigins = (Environment.GetEnvironmentVariable("MYAPP_FRONTEND_URLS") ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            return Ok(allowedOrigins);
         }
         
         [HttpPost("logout")]
