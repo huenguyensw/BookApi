@@ -34,6 +34,7 @@ builder.Services.Configure<BookStoreDatabaseSettings>(options =>
     options.ConnectionString = bookStoreSettings.ConnectionString;
     options.DatabaseName = bookStoreSettings.DatabaseName;
     options.BooksCollectionName = bookStoreSettings.BooksCollectionName;
+    options.QuotesCollectionName = bookStoreSettings.QuotesCollectionName;
 });
 
 
@@ -131,11 +132,15 @@ builder.Services.AddAuthorization();
 // 🔵 Registrera BookService som Singleton
 builder.Services.AddSingleton<BookService>();
 builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<QuoteService>();
 builder.Services.AddSingleton<JwtService>();
+
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<UserService>();
+// 🔵 Registrera QuoteService som Scoped
+builder.Services.AddScoped<QuoteService>();
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
